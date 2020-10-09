@@ -1,0 +1,96 @@
+<canvas id="my-canvas" width="500" height="500"></canvas>
+
+<script>
+    let mycanvas = document.getElementById('my-canvas')
+    let ctx = mycanvas.getContext('2d')
+    console.log(mycanvas)
+    let bird = {
+        x: 20,
+        y: 0,
+        vx: 0,
+        vy: 1,
+    }
+    let pipe = {
+        width: 20,
+        holeStart: 100,
+        holeEnd: 200,
+        x: 500
+    }
+    let gravity = 0.25
+    let haveYouLost = false;
+    let score = 0
+    function isColliding(px, py, rx, ry, rw, rh) {
+        if (px < rx) {
+            return false
+        }
+        if (py < ry) {
+            return false
+        }
+        if (px > rx + rw) {
+            return false
+        }
+        if (py > ry + rh) {
+            return false
+        }
+        return true
+    }
+    function isBirdCollidingWithPipe() {
+        if (isColliding(bird.x, bird.y, pipe.x, 0, pipe.width, pipe.holeStart)) {
+            return true
+        }
+        if (isColliding(bird.x, bird.y, pipe.x, pipe.holeEnd, pipe.width, 500 - pipe.holeEnd)) {
+            return true
+        }
+        return false
+    }
+    function draw() {
+        ctx.fillRect(bird.x, bird.y, 10, 10)
+        ctx.fillRect(pipe.x, 0, pipe.width, pipe.holeStart)
+        ctx.fillRect(pipe.x, pipe.holeEnd, pipe.width, 500 - pipe.holeEnd)
+    }
+    function clear() {
+        ctx.clearRect(0, 0, 500, 500)
+    }
+    function update() {
+        bird.x += bird.vx
+        bird.y += bird.vy
+        bird.vy += gravity
+        pipe.x -= 6
+        if (isBirdCollidingWithPipe()) {
+            haveYouLost = true;
+            alert("your score was " + score)
+        }
+        if (bird.y < 0 || bird.y > 500) {
+            haveYouLost = true;
+            alert("your score was " + score)
+        }
+        if (pipe.x < -pipe.width) {
+            pipe.x = 500
+            score++
+            let newHoleStart = Math.random() * 300;
+            let newHoleEnd = newHoleStart + Math.random() * 50 + 50;
+            pipe.holeEnd = newHoleEnd;
+            pipe.holeStart = newHoleStart;
+        }
+    }
+    function frame() {
+        if (haveYouLost) {
+            return;
+        }
+        update()
+        clear()
+        draw()
+    }
+    setInterval(frame, 1000 / 60)
+    function onKeyPress(e) {
+        bird.vy = -5
+    }
+    document.addEventListener('keydown', onKeyPress)
+</script>
+
+<style>
+    /* don't have to have this */
+    canvas {
+        border: 1px solid black;
+    }
+</style>
